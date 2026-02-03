@@ -283,6 +283,9 @@ RESEARCH_CONTENT=$(cat "${PHASE_DIR}"/*-RESEARCH.md 2>/dev/null)
 # Gap closure files (only if --gaps mode)
 VERIFICATION_CONTENT=$(cat "${PHASE_DIR}"/*-VERIFICATION.md 2>/dev/null)
 UAT_CONTENT=$(cat "${PHASE_DIR}"/*-UAT.md 2>/dev/null)
+
+# TDD preference for planner
+TDD_PREFERENCE=$(cat .planning/config.json 2>/dev/null | grep -o '"tdd_preference"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"\([^"]*\)"$/\1/' || echo "default")
 ```
 
 ## 9. Spawn gsd-planner Agent
@@ -303,6 +306,10 @@ Fill prompt with inlined content and spawn:
 
 **Phase:** {phase_number}
 **Mode:** {standard | gap_closure}
+**TDD Preference:** {tdd_preference}
+When "default": Apply TDD heuristic, create type:tdd plans when expect(fn(in)).toBe(out) applies.
+When "always": Prefer TDD for all testable features; use type:tdd unless clearly not applicable.
+When "never": Do not create TDD plans; use type:execute for all plans.
 
 **Project State:**
 {state_content}
