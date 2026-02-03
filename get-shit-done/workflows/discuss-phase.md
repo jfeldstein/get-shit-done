@@ -123,7 +123,55 @@ Use /gsd:progress to see available phases.
 ```
 Exit workflow.
 
-**If phase found:** Continue to analyze_phase.
+**If phase found:** Extract PADDED_PHASE, phase name, PHASE_DIR. Continue to ensure_phase_branch.
+</step>
+
+<step name="ensure_phase_branch">
+When `branching_strategy` is "phase" or "milestone", create or switch to the feature branch so all phase work (discuss, plan, execute, validate) happens on the same branch.
+
+**Skip if strategy is "none":** Continue to check_existing.
+
+**Load config:**
+
+```bash
+BRANCHING_STRATEGY=$(cat .planning/config.json 2>/dev/null | grep -o '"branching_strategy"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "none")
+BASE_BRANCH=$(cat .planning/config.json 2>/dev/null | grep -o '"base_branch"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "develop")
+PHASE_BRANCH_TEMPLATE=$(cat .planning/config.json 2>/dev/null | grep -o '"phase_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "gsd/phase-{phase}-{slug}")
+MILESTONE_BRANCH_TEMPLATE=$(cat .planning/config.json 2>/dev/null | grep -o '"milestone_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "gsd/{milestone}-{slug}")
+```
+
+**For "phase" strategy:**
+
+```bash
+# Get phase slug from roadmap (phase dir may not exist yet)
+PHASE_NAME=$(grep "Phase ${PADDED_PHASE}:" .planning/ROADMAP.md | sed 's/.*Phase [0-9]*\.*[0-9]*: //' | head -1 | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+PHASE_SLUG=$(echo "$PHASE_NAME" | tr -cd 'a-z0-9-' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+BRANCH_NAME=$(echo "$PHASE_BRANCH_TEMPLATE" | sed "s/{phase}/$PADDED_PHASE/g" | sed "s/{slug}/$PHASE_SLUG/g")
+
+if git rev-parse --verify "$BRANCH_NAME" 2>/dev/null; then
+  git checkout "$BRANCH_NAME"
+else
+  git fetch origin "$BASE_BRANCH" 2>/dev/null
+  git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH" 2>/dev/null || git checkout -b "$BRANCH_NAME" "$BASE_BRANCH" 2>/dev/null
+fi
+```
+
+**For "milestone" strategy:**
+
+```bash
+MILESTONE_VERSION=$(grep -oE 'v[0-9]+\.[0-9]+' .planning/ROADMAP.md | head -1 || echo "v1.0")
+MILESTONE_SLUG=$(grep -A1 "## .*$MILESTONE_VERSION" .planning/ROADMAP.md | tail -1 | sed 's/.*- //' | cut -d'(' -f1 | tr -d ' ' | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+BRANCH_NAME=$(echo "$MILESTONE_BRANCH_TEMPLATE" | sed "s/{milestone}/$MILESTONE_VERSION/g" | sed "s/{slug}/$MILESTONE_SLUG/g")
+
+if git rev-parse --verify "$BRANCH_NAME" 2>/dev/null; then
+  git checkout "$BRANCH_NAME"
+else
+  git fetch origin "$BASE_BRANCH" 2>/dev/null
+  git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH" 2>/dev/null || git checkout -b "$BRANCH_NAME" "$BASE_BRANCH" 2>/dev/null
+fi
+```
+
+**Report:** "Branch: {branch_name} (from {base_branch})"
 </step>
 
 <step name="check_existing">

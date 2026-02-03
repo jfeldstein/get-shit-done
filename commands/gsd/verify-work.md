@@ -36,16 +36,17 @@ Phase: $ARGUMENTS (optional)
 
 <process>
 1. Check for active UAT sessions (resume or start new)
-2. Find SUMMARY.md files for the phase
-3. Extract testable deliverables (user-observable outcomes)
-4. Create {phase}-UAT.md with test list
-5. Present tests one at a time:
+2. Ensure phase branch (when branching_strategy = phase or milestone) — create/switch to feature branch so validation happens on same branch as discuss/plan/execute
+3. Find SUMMARY.md files for the phase
+4. Extract testable deliverables (user-observable outcomes)
+5. Create {phase}-UAT.md with test list
+6. Present tests one at a time:
    - Show expected behavior
    - Wait for plain text response
    - "yes/y/next" = pass, anything else = issue (severity inferred)
-6. Update UAT.md after each response
-7. On completion: commit, present summary
-8. If issues found:
+7. Update UAT.md after each response
+8. On completion: commit, present summary
+9. If issues found:
    - Spawn parallel debug agents to diagnose root causes
    - Spawn gsd-planner in --gaps mode to create fix plans
    - Spawn gsd-plan-checker to verify fix plans

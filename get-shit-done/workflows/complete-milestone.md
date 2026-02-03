@@ -586,8 +586,10 @@ Check if branching was used and offer merge options.
 **Check branching strategy:**
 
 ```bash
-# Get branching strategy from config
+# Get branching strategy, base branch, and PR preference from config
 BRANCHING_STRATEGY=$(cat .planning/config.json 2>/dev/null | grep -o '"branching_strategy"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "none")
+BASE_BRANCH=$(cat .planning/config.json 2>/dev/null | grep -o '"base_branch"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "develop")
+CREATE_PR_ON_COMPLETE=$(cat .planning/config.json 2>/dev/null | grep -o '"create_pr_on_complete"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "false")
 ```
 
 **If strategy is "none":** Skip to git_tag step.
@@ -620,43 +622,36 @@ MILESTONE_BRANCH=$(git branch --list "${BRANCH_PREFIX}*" 2>/dev/null | sed 's/^\
 
 **If branches exist — present merge options:**
 
+**If `CREATE_PR_ON_COMPLETE=true`:** Include "Create PR" option (for teams).
+
+**If `CREATE_PR_ON_COMPLETE=false` (default):** Omit "Create PR"; solo devs merge directly.
+
 ```
 ## Git Branches Detected
 
 Branching strategy: {phase/milestone}
+Base branch: {base_branch}
 
 Branches found:
 {list of branches}
 
-Options:
-1. **Merge to main** — Merge branch(es) to main
-2. **Delete without merging** — Branches already merged or not needed
-3. **Keep branches** — Leave for manual handling
+Options (build from config):
+- If create_pr_on_complete: Squash merge, Merge with history, Create PR, Delete without merging, Keep branches
+- If not: Squash merge (default for solo), Merge with history, Delete without merging, Keep branches
 ```
 
-Use AskUserQuestion:
+**Options array:** Include "Create PR" only when `CREATE_PR_ON_COMPLETE=true`. Default selection: when false, pre-select "Squash merge".
 
-```
-AskUserQuestion([
-  {
-    question: "How should branches be handled?",
-    header: "Branches",
-    multiSelect: false,
-    options: [
-      { label: "Squash merge (Recommended)", description: "Squash all commits into one clean commit on main" },
-      { label: "Merge with history", description: "Preserve all individual commits (--no-ff)" },
-      { label: "Delete without merging", description: "Branches already merged or not needed" },
-      { label: "Keep branches", description: "Leave branches for manual handling later" }
-    ]
-  }
-])
-```
+**If "Create PR":**
+
+Report: "Branch(es) ready for PR. Open PR from {branch(es)} to {base_branch}. Run CI, review, then merge. Branches preserved."
 
 **If "Squash merge":**
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
-git checkout main
+git checkout "$BASE_BRANCH"
+git pull origin "$BASE_BRANCH" 2>/dev/null
 
 # For phase strategy - squash merge each phase branch
 if [ "$BRANCHING_STRATEGY" = "phase" ]; then
@@ -683,7 +678,8 @@ Report: "Squash merged branches to main"
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
-git checkout main
+git checkout "$BASE_BRANCH"
+git pull origin "$BASE_BRANCH" 2>/dev/null
 
 # For phase strategy - merge each phase branch
 if [ "$BRANCHING_STRATEGY" = "phase" ]; then

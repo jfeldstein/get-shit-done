@@ -81,12 +81,15 @@ Store `PARALLELIZATION` for use in wave execution step. When `false`, plans with
 # Get branching strategy (default: none)
 BRANCHING_STRATEGY=$(cat .planning/config.json 2>/dev/null | grep -o '"branching_strategy"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "none")
 
+# Get base branch (default: develop)
+BASE_BRANCH=$(cat .planning/config.json 2>/dev/null | grep -o '"base_branch"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "develop")
+
 # Get templates
 PHASE_BRANCH_TEMPLATE=$(cat .planning/config.json 2>/dev/null | grep -o '"phase_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "gsd/phase-{phase}-{slug}")
 MILESTONE_BRANCH_TEMPLATE=$(cat .planning/config.json 2>/dev/null | grep -o '"milestone_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "gsd/{milestone}-{slug}")
 ```
 
-Store `BRANCHING_STRATEGY` and templates for use in branch creation step.
+Store `BRANCHING_STRATEGY`, `BASE_BRANCH`, and templates for use in branch creation step.
 </step>
 
 <step name="handle_branching">
@@ -101,12 +104,12 @@ if [ "$BRANCHING_STRATEGY" = "none" ]; then
 fi
 ```
 
-**For "phase" strategy — create phase branch:**
+**For "phase" strategy — create or switch to phase branch:**
 
 ```bash
 if [ "$BRANCHING_STRATEGY" = "phase" ]; then
   # Get phase name from directory (e.g., "03-authentication" → "authentication")
-  PHASE_NAME=$(basename "$PHASE_DIR" | sed 's/^[0-9]*-//')
+  PHASE_NAME=$(basename "$PHASE_DIR" | sed 's/^[0-9]*\.*[0-9]*-//')
 
   # Create slug from phase name
   PHASE_SLUG=$(echo "$PHASE_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
@@ -114,14 +117,19 @@ if [ "$BRANCHING_STRATEGY" = "phase" ]; then
   # Apply template
   BRANCH_NAME=$(echo "$PHASE_BRANCH_TEMPLATE" | sed "s/{phase}/$PADDED_PHASE/g" | sed "s/{slug}/$PHASE_SLUG/g")
 
-  # Create or switch to branch
-  git checkout -b "$BRANCH_NAME" 2>/dev/null || git checkout "$BRANCH_NAME"
+  # Create or switch to branch (branch off base_branch if creating)
+  if git rev-parse --verify "$BRANCH_NAME" 2>/dev/null; then
+    git checkout "$BRANCH_NAME"
+  else
+    git fetch origin "$BASE_BRANCH" 2>/dev/null
+    git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH" 2>/dev/null || git checkout -b "$BRANCH_NAME" "$BASE_BRANCH" 2>/dev/null
+  fi
 
-  echo "Branch: $BRANCH_NAME (phase branching)"
+  echo "Branch: $BRANCH_NAME (from $BASE_BRANCH)"
 fi
 ```
 
-**For "milestone" strategy — create/switch to milestone branch:**
+**For "milestone" strategy — create or switch to milestone branch:**
 
 ```bash
 if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
@@ -135,10 +143,15 @@ if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
   # Apply template
   BRANCH_NAME=$(echo "$MILESTONE_BRANCH_TEMPLATE" | sed "s/{milestone}/$MILESTONE_VERSION/g" | sed "s/{slug}/$MILESTONE_SLUG/g")
 
-  # Create or switch to branch (same branch for all phases in milestone)
-  git checkout -b "$BRANCH_NAME" 2>/dev/null || git checkout "$BRANCH_NAME"
+  # Create or switch to branch (branch off base_branch if creating)
+  if git rev-parse --verify "$BRANCH_NAME" 2>/dev/null; then
+    git checkout "$BRANCH_NAME"
+  else
+    git fetch origin "$BASE_BRANCH" 2>/dev/null
+    git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH" 2>/dev/null || git checkout -b "$BRANCH_NAME" "$BASE_BRANCH" 2>/dev/null
+  fi
 
-  echo "Branch: $BRANCH_NAME (milestone branching)"
+  echo "Branch: $BRANCH_NAME (from $BASE_BRANCH)"
 fi
 ```
 
@@ -148,7 +161,7 @@ fi
 Branching: {strategy} → {branch_name}
 ```
 
-**Note:** All subsequent plan commits go to this branch. User handles merging based on their workflow.
+**Note:** All phase workflows (discuss, plan, execute, verify) use this same branch. Agent worktrees merge into it. When validated, PR to `base_branch` (see complete-milestone).
 </step>
 
 <step name="validate_phase">
@@ -406,7 +419,7 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel **
 
    **Order:** Merge all agent branches from wave, then remove worktrees. Base branch = current branch (or phase branch if branching strategy active).
 
-   **Test execution:** Skipped (per user decision in CONTEXT.md).
+   **Test execution:** Check config `test_after_merge`. If true, after each merge run test suite (e.g. `npm test` or project default); fail if exit non-zero. If false or unset, skip (backward compatible with CONTEXT.md "skip tests" decision).
 
 4. **Report completion and what was built:**
 

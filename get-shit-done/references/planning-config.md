@@ -10,6 +10,8 @@ Configuration options for `.planning/` directory behavior.
 },
 "git": {
   "branching_strategy": "none",
+  "base_branch": "develop",
+  "create_pr_on_complete": false,
   "phase_branch_template": "gsd/phase-{phase}-{slug}",
   "milestone_branch_template": "gsd/{milestone}-{slug}"
 }
@@ -20,6 +22,9 @@ Configuration options for `.planning/` directory behavior.
 | `commit_docs` | `true` | Whether to commit planning artifacts to git |
 | `search_gitignored` | `false` | Add `--no-ignore` to broad rg searches |
 | `git.branching_strategy` | `"none"` | Git branching approach: `"none"`, `"phase"`, or `"milestone"` |
+| `git.base_branch` | `"develop"` | Branch to create feature branches from; merge target at milestone complete |
+| `git.create_pr_on_complete` | `false` | When true, complete-milestone leaves branch for PR (teams). When false, merge directly (solo) |
+| `git.test_after_merge` | `false` | When true, run test suite after each agent branch merge in execute-phase |
 | `git.phase_branch_template` | `"gsd/phase-{phase}-{slug}"` | Branch template for phase strategy |
 | `git.milestone_branch_template` | `"gsd/{milestone}-{slug}"` | Branch template for milestone strategy |
 </config_schema>
@@ -106,25 +111,28 @@ To use uncommitted mode:
 | Strategy | When branch created | Branch scope | Merge point |
 |----------|---------------------|--------------|-------------|
 | `none` | Never | N/A | N/A |
-| `phase` | At `execute-phase` start | Single phase | User merges after phase |
-| `milestone` | At first `execute-phase` of milestone | Entire milestone | At `complete-milestone` |
+| `phase` | At `discuss-phase` start | Single phase | PR to base_branch at `complete-milestone` |
+| `milestone` | At first `discuss-phase` of milestone | Entire milestone | PR to base_branch at `complete-milestone` |
+
+**Phase feature-branch flow (strategy = "phase" or "milestone"):**
+
+All phase-related workflows use the same feature branch. Branch off `base_branch` (e.g. develop) at the start; discuss, plan, execute, and validate all happen on that branch. Individual plans land into the feature branch (agent worktrees merge in); tests rerun after each merge. Only when everything is validated/verified, PR back to base_branch.
 
 **When `git.branching_strategy: "none"` (default):**
 - All work commits to current branch
 - Standard GSD behavior
 
 **When `git.branching_strategy: "phase"`:**
-- `execute-phase` creates/switches to a branch before execution
+- `discuss-phase` creates feature branch off `base_branch` at start (first phase workflow)
+- `plan-phase`, `research-phase`, `execute-phase`, `verify-work` ensure same branch (create if user skipped discuss)
 - Branch name from `phase_branch_template` (e.g., `gsd/phase-03-authentication`)
-- All plan commits go to that branch
-- User merges branches manually after phase completion
-- `complete-milestone` offers to merge all phase branches
+- Agent worktrees merge into this feature branch; tests run after each plan merge
+- `complete-milestone` offers PR to `base_branch` (or merge)
 
 **When `git.branching_strategy: "milestone"`:**
-- First `execute-phase` of milestone creates the milestone branch
-- Branch name from `milestone_branch_template` (e.g., `gsd/v1.0-mvp`)
-- All phases in milestone commit to same branch
-- `complete-milestone` offers to merge milestone branch to main
+- First `discuss-phase` of milestone creates the milestone branch off `base_branch`
+- All phases in milestone use same branch
+- `complete-milestone` offers PR to `base_branch` (or merge)
 
 **Template variables:**
 
@@ -139,6 +147,9 @@ To use uncommitted mode:
 ```bash
 # Get branching strategy (default: none)
 BRANCHING_STRATEGY=$(cat .planning/config.json 2>/dev/null | grep -o '"branching_strategy"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "none")
+
+# Get base branch (default: develop)
+BASE_BRANCH=$(cat .planning/config.json 2>/dev/null | grep -o '"base_branch"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "develop")
 
 # Get phase branch template
 PHASE_BRANCH_TEMPLATE=$(cat .planning/config.json 2>/dev/null | grep -o '"phase_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "gsd/phase-{phase}-{slug}")
@@ -167,14 +178,15 @@ fi
 
 **Merge options at complete-milestone:**
 
-| Option | Git command | Result |
-|--------|-------------|--------|
-| Squash merge (recommended) | `git merge --squash` | Single clean commit per branch |
-| Merge with history | `git merge --no-ff` | Preserves all individual commits |
-| Delete without merging | `git branch -D` | Discard branch work |
-| Keep branches | (none) | Manual handling later |
+| Option | When shown | Result |
+|--------|------------|--------|
+| Create PR | `create_pr_on_complete: true` | Leave branch for user to open PR to `base_branch` |
+| Squash merge | always | Single clean commit on `base_branch` |
+| Merge with history | always | Preserves all individual commits on `base_branch` |
+| Delete without merging | always | Discard branch work |
+| Keep branches | always | Manual handling later |
 
-Squash merge is recommended — keeps main branch history clean while preserving the full development history in the branch (until deleted).
+`create_pr_on_complete: true` — for teams; leave branch for PR, CI, review. `false` (default) — for solo; merge directly to `base_branch`.
 
 **Use cases:**
 

@@ -106,7 +106,24 @@ grep -A5 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null
 
 **If not found:** Error with available phases. **If found:** Extract phase number, name, description.
 
-## 4. Ensure Phase Directory Exists and Load CONTEXT.md
+## 4. Ensure Phase Branch (when branching_strategy = phase or milestone)
+
+When branching is enabled, create or switch to the feature branch so plan output lands on the same branch as discuss/execute/verify.
+
+**Skip if strategy is "none".** Otherwise:
+
+```bash
+BRANCHING_STRATEGY=$(cat .planning/config.json 2>/dev/null | grep -o '"branching_strategy"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "none")
+BASE_BRANCH=$(cat .planning/config.json 2>/dev/null | grep -o '"base_branch"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "develop")
+```
+
+**For "phase":** Compute BRANCH_NAME from phase_branch_template (phase + slug from roadmap). If branch exists, checkout. Else create from BASE_BRANCH.
+
+**For "milestone":** Compute BRANCH_NAME from milestone_branch_template. Same create/checkout logic.
+
+Report: "Branch: {branch_name}"
+
+## 5. Ensure Phase Directory Exists and Load CONTEXT.md
 
 ```bash
 # PHASE is already normalized (08, 02.1, etc.) from step 2
@@ -130,7 +147,7 @@ CONTEXT_CONTENT=$(cat "${PHASE_DIR}"/*-CONTEXT.md 2>/dev/null)
 
 If CONTEXT.md exists, display: `Using phase context from: ${PHASE_DIR}/*-CONTEXT.md`
 
-## 5. Handle Research
+## 6. Handle Research
 
 **If `--gaps` flag:** Skip research (gap closure uses VERIFICATION.md instead).
 
@@ -241,7 +258,7 @@ Task(
 - Offer: 1) Provide more context, 2) Skip research and plan anyway, 3) Abort
 - Wait for user response
 
-## 6. Check Existing Plans
+## 7. Check Existing Plans
 
 ```bash
 ls "${PHASE_DIR}"/*-PLAN.md 2>/dev/null
@@ -249,7 +266,7 @@ ls "${PHASE_DIR}"/*-PLAN.md 2>/dev/null
 
 **If exists:** Offer: 1) Continue planning (add more plans), 2) View existing, 3) Replan from scratch. Wait for response.
 
-## 7. Read Context Files
+## 8. Read Context Files
 
 Read and store context file contents for the planner agent. The `@` syntax does not work across Task() boundaries - content must be inlined.
 
@@ -268,7 +285,7 @@ VERIFICATION_CONTENT=$(cat "${PHASE_DIR}"/*-VERIFICATION.md 2>/dev/null)
 UAT_CONTENT=$(cat "${PHASE_DIR}"/*-UAT.md 2>/dev/null)
 ```
 
-## 8. Spawn gsd-planner Agent
+## 9. Spawn gsd-planner Agent
 
 Display stage banner:
 ```
@@ -345,7 +362,7 @@ Task(
 )
 ```
 
-## 9. Handle Planner Return
+## 10. Handle Planner Return
 
 Parse planner output:
 
@@ -364,7 +381,7 @@ Parse planner output:
 - Offer: Add context, Retry, Manual
 - Wait for user response
 
-## 10. Spawn gsd-plan-checker Agent
+## 11. Spawn gsd-plan-checker Agent
 
 Display:
 ```
@@ -428,7 +445,7 @@ Task(
 )
 ```
 
-## 11. Handle Checker Return
+## 12. Handle Checker Return
 
 **If `## VERIFICATION PASSED`:**
 - Display: `Plans verified. Ready for execution.`
@@ -440,7 +457,7 @@ Task(
 - Check iteration count
 - Proceed to step 12
 
-## 12. Revision Loop (Max 3 Iterations)
+## 13. Revision Loop (Max 3 Iterations)
 
 Track: `iteration_count` (starts at 1 after initial plan + check)
 
@@ -509,7 +526,7 @@ Offer options:
 
 Wait for user response.
 
-## 13. Present Final Status
+## 14. Present Final Status
 
 Route to `<offer_next>`.
 

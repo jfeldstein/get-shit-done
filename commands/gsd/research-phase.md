@@ -51,6 +51,8 @@ Store resolved model for use in Task calls below.
 
 ## 1. Normalize and Validate Phase
 
+Normalize phase number, validate against roadmap. Extract PADDED_PHASE, phase name.
+
 ```bash
 # Normalize phase number (8 → 08, but preserve decimals like 2.1 → 02.1)
 if [[ "$ARGUMENTS" =~ ^[0-9]+$ ]]; then
@@ -66,7 +68,11 @@ grep -A5 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null
 
 **If not found:** Error and exit. **If found:** Extract phase number, name, description.
 
-## 2. Check Existing Research
+## 2. Ensure Phase Branch (when branching_strategy = phase or milestone)
+
+Same logic as discuss-phase and plan-phase: create or switch to feature branch so research output lands on the same branch. Skip if strategy is "none". Use BASE_BRANCH from config (default: develop).
+
+## 3. Check Existing Research
 
 ```bash
 ls .planning/phases/${PHASE}-*/RESEARCH.md 2>/dev/null
@@ -76,7 +82,7 @@ ls .planning/phases/${PHASE}-*/RESEARCH.md 2>/dev/null
 
 **If doesn't exist:** Continue.
 
-## 3. Gather Phase Context
+## 4. Gather Phase Context
 
 ```bash
 grep -A20 "Phase ${PHASE}:" .planning/ROADMAP.md
@@ -87,7 +93,7 @@ grep -A30 "### Decisions Made" .planning/STATE.md 2>/dev/null
 
 Present summary with phase description, requirements, prior decisions.
 
-## 4. Spawn gsd-phase-researcher Agent
+## 5. Spawn gsd-phase-researcher Agent
 
 Research modes: ecosystem (default), feasibility, implementation, comparison.
 
@@ -155,7 +161,7 @@ Task(
 )
 ```
 
-## 5. Handle Agent Return
+## 6. Handle Agent Return
 
 **`## RESEARCH COMPLETE`:** Display summary, offer: Plan phase, Dig deeper, Review full, Done.
 
@@ -163,7 +169,7 @@ Task(
 
 **`## RESEARCH INCONCLUSIVE`:** Show what was attempted, offer: Add context, Try different mode, Manual.
 
-## 6. Spawn Continuation Agent
+## 7. Spawn Continuation Agent
 
 ```markdown
 <objective>

@@ -85,8 +85,28 @@ AskUserQuestion([
     multiSelect: false,
     options: [
       { label: "None (Recommended)", description: "Commit directly to current branch" },
-      { label: "Per Phase", description: "Create branch for each phase (gsd/phase-{N}-{name})" },
-      { label: "Per Milestone", description: "Create branch for entire milestone (gsd/{version}-{name})" }
+      { label: "Per Phase", description: "Feature branch per phase, branch off base_branch at discuss, PR at complete" },
+      { label: "Per Milestone", description: "One feature branch for milestone, branch off base_branch, PR at complete" }
+    ]
+  },
+  // If branching = phase or milestone:
+  {
+    question: "Base branch (branch off this, merge back to this)?",
+    header: "Base Branch",
+    multiSelect: false,
+    options: [
+      { label: "develop", description: "Standard integration branch" },
+      { label: "main", description: "Primary branch" },
+      { label: "master", description: "Legacy primary branch" }
+    ]
+  },
+  {
+    question: "Leave branch for PR at milestone complete? (vs merge directly)",
+    header: "Merge Flow",
+    multiSelect: false,
+    options: [
+      { label: "Merge directly (Solo)", description: "Squash/merge to base_branch — no PR" },
+      { label: "Create PR (Team)", description: "Leave branch for PR, CI, review" }
     ]
   }
 ])
@@ -108,7 +128,9 @@ Merge new settings into existing config.json:
     "verifier": true/false
   },
   "git": {
-    "branching_strategy": "none" | "phase" | "milestone"
+    "branching_strategy": "none" | "phase" | "milestone",
+    "base_branch": "develop" | "main" | "master",
+    "create_pr_on_complete": false | true
   }
 }
 ```
