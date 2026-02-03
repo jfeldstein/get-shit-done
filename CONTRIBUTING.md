@@ -52,7 +52,7 @@ git checkout -b feat/model-profiles
 
 # Ship it
 git push origin feat/model-profiles
-# Open PR, get review, merge
+# Use gh cli: gh pr create --base main --head feat/model-profiles
 ```
 
 **Branch naming:**

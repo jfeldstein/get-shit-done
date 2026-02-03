@@ -161,7 +161,7 @@ fi
 Branching: {strategy} → {branch_name}
 ```
 
-**Note:** All phase workflows (discuss, plan, execute, verify) use this same branch. Agent worktrees merge into it. When validated, PR to `base_branch` (see complete-milestone).
+**Note:** All phase workflows (discuss, plan, execute, verify) use this same branch. Agent worktrees merge into it. When validated, use `gh pr create` to open PR to `base_branch` (see complete-milestone).
 </step>
 
 <step name="validate_phase">
