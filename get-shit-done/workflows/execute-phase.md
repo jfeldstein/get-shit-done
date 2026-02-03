@@ -381,7 +381,34 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel **
 
    Task tool blocks until each agent finishes. All parallel agents return together.
 
-3. **Report completion and what was built:**
+3. **Merge and cleanup (for each completed plan in wave):**
+
+   For each completed plan (using stored mapping from worktree_setup):
+
+   ```bash
+   # Merge agent branch into base branch
+   git merge --no-ff "$AGENT_BRANCH" -m "Merge $AGENT_BRANCH: {plan_name}"
+   ```
+
+   **If merge conflict:**
+   - Orchestrator resolves conflicts (user decision: not subagent rebase)
+   - Document: "Orchestrator resolves conflicts manually, stages resolved files, completes merge"
+   - Retry/abort guidance: If resolution fails, ask user to resolve or abort merge
+
+   ```bash
+   # After merge succeeds: delete agent branch
+   git branch -d "$AGENT_BRANCH"
+
+   # Remove worktree
+   git worktree remove "wt/agent-${AGENT_ID}"
+   # Or --force if uncommitted changes remain: git worktree remove --force "wt/agent-${AGENT_ID}"
+   ```
+
+   **Order:** Merge all agent branches from wave, then remove worktrees. Base branch = current branch (or phase branch if branching strategy active).
+
+   **Test execution:** Skipped (per user decision in CONTEXT.md).
+
+4. **Report completion and what was built:**
 
    For each completed agent:
    - Verify SUMMARY.md exists at expected path
@@ -410,7 +437,7 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel **
    - Bad: "Wave 2 complete. Proceeding to Wave 3."
    - Good: "Terrain system complete — 3 biome types, height-based texturing, physics collision meshes. Vehicle physics (Wave 3) can now reference ground surfaces."
 
-4. **Handle failures:**
+5. **Handle failures:**
 
    If any agent in wave fails:
    - Report which plan failed and why
@@ -418,11 +445,11 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel **
    - If continue: proceed to next wave (dependent plans may also fail)
    - If stop: exit with partial completion report
 
-5. **Execute checkpoint plans between waves:**
+6. **Execute checkpoint plans between waves:**
 
    See `<checkpoint_handling>` for details.
 
-6. **Proceed to next wave**
+7. **Proceed to next wave**
 
 </step>
 
