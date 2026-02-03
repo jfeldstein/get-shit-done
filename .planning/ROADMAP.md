@@ -21,12 +21,11 @@ Integrate worktree-based execution (repo root read-only, subagents in wt/) and a
   3. Branch names use feature--<name>--agents--agent-<id>--<task> pattern
   4. Orchestrator merges agent branches, runs test suite (exit 0), then removes worktrees
   5. wt/ is in .gitignore (done)
-**Plans**: TBD (3-5 plans expected)
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD during plan-phase
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01: Worktree creation and executor spawn context
+- [ ] 01-02: Merge and cleanup after executor completes
 
 ### Phase 2: TDD Workflow
 **Goal**: TDD (Plan→Spec→Red→Green→Refactor) is the primary execution path for applicable plans.
