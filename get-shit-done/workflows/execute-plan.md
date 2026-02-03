@@ -559,15 +559,15 @@ Use AskUserQuestion:
 <step name="execute">
 Execute each task in the prompt. **Deviations are normal** - handle them automatically using embedded rules below.
 
+**0. Plan type check (before any execution):** Read plan frontmatter. If `type: tdd`, follow `<tdd_plan_execution>` section exclusively—do NOT use the standard task loop below. TDD plans have their own RED-GREEN-REFACTOR cycle. Skip to tdd_plan_execution.
+
 1. Read the @context files listed in the prompt
 
 2. For each task:
 
    **If `type="auto"`:**
 
-   **Before executing:** Check if task has `tdd="true"` attribute:
-   - If yes: Follow TDD execution flow (see `<tdd_execution>`) - RED → GREEN → REFACTOR cycle with atomic commits per stage
-   - If no: Standard implementation
+   Standard implementation (plan-level `type: tdd` was already handled in step 0)
 
    - Work toward task completion
    - **If CLI/API returns authentication error:** Handle as authentication gate (see below)
@@ -951,6 +951,7 @@ After TDD plan completion, ensure:
 - All tests pass
 - Test coverage for the new behavior exists
 - No unrelated tests broken
+- Exactly 2-3 commits (test, feat, optionally refactor)—no more, no fewer for the cycle
 
 **Why TDD uses dedicated plans:** TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. This consumes 40-50% of context for a single feature. Dedicated plans ensure full quality throughout the cycle.
 
