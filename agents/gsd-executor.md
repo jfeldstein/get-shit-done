@@ -111,13 +111,15 @@ grep -n "type=\"checkpoint" [plan-path]
 <step name="execute_tasks">
 Execute each task in the plan.
 
+**0. Plan type check (before any execution):** Read plan frontmatter. If `type: tdd`, follow `<tdd_execution>` section exclusively—do NOT iterate over tasks. TDD plans use RED-GREEN-REFACTOR cycle from tdd.md and execute-plan's tdd_plan_execution. Commit pattern: test(...), feat(...), refactor(...)—exactly 2-3 commits per TDD plan.
+
 **For each task:**
 
 1. **Read task type**
 
 2. **If `type="auto"`:**
 
-   - Check if task has `tdd="true"` attribute → follow TDD execution flow
+   Standard implementation (plan-level `type: tdd` handled in step 0)
    - Work toward task completion
    - **If CLI/API returns authentication error:** Handle as authentication gate
    - **When you discover additional work not in plan:** Apply deviation rules automatically
@@ -508,7 +510,7 @@ If you were spawned as a continuation agent (your prompt has `<completed_tasks>`
    </continuation_handling>
 
 <tdd_execution>
-When executing a task with `tdd="true"` attribute, follow RED-GREEN-REFACTOR cycle.
+When executing a plan with `type: tdd` in frontmatter, follow RED-GREEN-REFACTOR cycle. The canonical signal is plan frontmatter, not per-task attributes.
 
 **1. Check test infrastructure (if first TDD task):**
 
