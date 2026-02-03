@@ -8,10 +8,10 @@
 ### Worktree Integration
 
 - [ ] **WT-01**: wt/ is in .gitignore (done)
-- [ ] **WT-02**: Executor spawns subagents in worktrees (wt/agent-xxx), never in repo root
-- [ ] **WT-03**: Repo root is read-only for all subagent work
-- [ ] **WT-04**: Branch names follow feature--<name>--agents--agent-<id>--<task> pattern (double-dash segments)
-- [ ] **WT-05**: Orchestrator merges agent branches into feature branch, runs test suite (exit 0), then cleans up worktrees
+- [x] **WT-02**: Executor spawns subagents in worktrees (wt/agent-xxx), never in repo root
+- [x] **WT-03**: Repo root is read-only for all subagent work
+- [x] **WT-04**: Branch names follow feature--<name>--agents--agent-<id>--<task> pattern (double-dash segments)
+- [x] **WT-05**: Orchestrator merges agent branches into feature branch, then cleans up worktrees (test suite skipped per user decision)
 
 ### TDD Workflow
 
@@ -35,10 +35,10 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | WT-01 | Phase 1 | Complete |
-| WT-02 | Phase 1 | Pending |
-| WT-03 | Phase 1 | Pending |
-| WT-04 | Phase 1 | Pending |
-| WT-05 | Phase 1 | Pending |
+| WT-02 | Phase 1 | Complete |
+| WT-03 | Phase 1 | Complete |
+| WT-04 | Phase 1 | Complete |
+| WT-05 | Phase 1 | Complete |
 | TDD-01 | Phase 2 | Pending |
 | TDD-02 | Phase 2 | Pending |
 | TDD-03 | Phase 2 | Pending |

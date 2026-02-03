@@ -6,7 +6,7 @@ Integrate worktree-based execution (repo root read-only, subagents in wt/) and a
 
 ## Phases
 
-- [ ] **Phase 1: Worktree Integration** — Executor spawns subagents in worktrees; orchestrator merges with test verification
+- [x] **Phase 1: Worktree Integration** — Executor spawns subagents in worktrees; orchestrator merges with test verification
 - [ ] **Phase 2: TDD Workflow** — Plan→Spec→Red→Green→Refactor as primary execution path
 
 ## Phase Details
@@ -24,8 +24,8 @@ Integrate worktree-based execution (repo root read-only, subagents in wt/) and a
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: Worktree creation and executor spawn context
-- [ ] 01-02: Merge and cleanup after executor completes
+- [x] 01-01: Worktree creation and executor spawn context
+- [x] 01-02: Merge and cleanup after executor completes
 
 ### Phase 2: TDD Workflow
 **Goal**: TDD (Plan→Spec→Red→Green→Refactor) is the primary execution path for applicable plans.
@@ -45,7 +45,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Worktree Integration | 0/3 | Not started | - |
+| 1. Worktree Integration | 2/2 | Complete | 2025-02-03 |
 | 2. TDD Workflow | 0/2 | Not started | - |
 
 ---
