@@ -8,6 +8,9 @@ commands.html
 # Local test installs
 .claude/
 
+# Worktree directory (parallel agents workflow)
+wt/
+
 # Build artifacts (committed to npm, not git)
 hooks/dist/
 
