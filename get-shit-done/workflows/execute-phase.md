@@ -244,6 +244,47 @@ Report wave structure with context:
 The "What it builds" column comes from skimming plan names/objectives. Keep it brief (3-8 words).
 </step>
 
+<step name="worktree_setup">
+Before spawning executors for each wave, create worktrees and agent branches.
+
+**Sanitization function** (orchestrator uses this for branch names):
+
+```bash
+sanitize_branch_name() {
+  echo "$1" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//' | head -c 50
+}
+```
+
+**Setup sequence (run before spawning each wave):**
+
+```bash
+# Ensure wt/ exists
+mkdir -p wt
+
+# For each plan in the wave, before spawning:
+# 1. Generate 4-char agent ID (e.g., a1b2)
+AGENT_ID=$(head -c 4 /dev/urandom | xxd -p | tr -d '\n')
+
+# 2. Sanitize plan slug from plan filename (e.g., 01-01-PLAN.md → 01-01)
+PLAN_SLUG=$(basename "$PLAN_PATH" | sed 's/-PLAN\.md$//')
+
+# 3. Sanitize phase name for feature branch (e.g., 01-worktree-integration → worktree-integration)
+PHASE_SLUG=$(echo "$(basename "$PHASE_DIR" | sed 's/^[0-9]*-//')" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//' | head -c 50)
+
+# 4. Create branch name: feature--{phase-slug}--agents--agent-{id}--{plan-slug}
+AGENT_BRANCH="feature--${PHASE_SLUG}--agents--agent-${AGENT_ID}--${PLAN_SLUG}"
+
+# 5. Create worktree
+git worktree add -b "$AGENT_BRANCH" "wt/agent-${AGENT_ID}"
+
+# 6. Store mapping: plan_id → worktree_path, agent_branch for use in spawn and post-spawn
+# worktree_path = wt/agent-{AGENT_ID} (or absolute path)
+# agent_branch = $AGENT_BRANCH
+```
+
+**Output:** For each plan in wave, orchestrator has: `worktree_path`, `agent_branch`, `plan_id`.
+</step>
+
 <step name="execute_waves">
 Execute each wave in sequence. Autonomous plans within a wave run in parallel **only if `PARALLELIZATION=true`**.
 
@@ -251,7 +292,9 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel **
 
 **For each wave:**
 
-1. **Describe what's being built (BEFORE spawning):**
+1. **Worktree setup (run worktree_setup step):** Create worktree and agent branch for each plan in this wave. Store mapping.
+
+2. **Describe what's being built (BEFORE spawning):**
 
    Read each plan's `<objective>` section. Extract what's being built and why it matters.
 
@@ -291,13 +334,20 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel **
    
    **If `PARALLELIZATION=false`:** Spawn agents one at a time, waiting for each to complete before starting the next. This ensures no concurrent file modifications or build operations.
 
-   Each agent gets prompt with inlined content:
+   Each agent gets prompt with inlined content. **Orchestrator must substitute `{worktree_path}` with the actual path** (e.g., `wt/agent-a1b2` or absolute path) for each plan's spawn.
 
    ```
+   <worktree_context>
+   Your working directory is: {worktree_path}
+   All file operations, git commands, and edits MUST be in this directory.
+   NEVER modify files outside this worktree. Repo root is READ ONLY.
+   </worktree_context>
+
    <objective>
    Execute plan {plan_number} of phase {phase_number}-{phase_name}.
 
    Commit each task atomically. Create SUMMARY.md. Update STATE.md.
+   Executor runs all commands from worktree directory (cd to worktree before executing).
    </objective>
 
    <execution_context>
@@ -323,6 +373,7 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel **
    - [ ] Each task committed individually
    - [ ] SUMMARY.md created in plan directory
    - [ ] STATE.md updated with position and decisions
+   - [ ] Executor runs all commands from worktree directory (cd to worktree before executing)
    </success_criteria>
    ```
 
