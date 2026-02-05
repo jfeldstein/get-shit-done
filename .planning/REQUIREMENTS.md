@@ -21,9 +21,9 @@
 
 ### Milestone Blog Posts
 
-- [ ] **BLOG-01**: /gsd:complete-milestone triggers automatic blog post generation
-- [ ] **BLOG-02**: Posts draw from all milestone artifacts (SUMMARY, CONTEXT, VERIFICATION, UAT, diffs, session logs)
-- [ ] **BLOG-03**: Posts land in docs/blog/ (gitignored) for human retrieval and external publishing
+- [x] **BLOG-01**: /gsd:complete-milestone triggers automatic blog post generation
+- [x] **BLOG-02**: Posts draw from all milestone artifacts (SUMMARY, CONTEXT, VERIFICATION, UAT, diffs, session logs)
+- [x] **BLOG-03**: Posts land in docs/blog/ (gitignored) for human retrieval and external publishing
 
 ## v2 Requirements
 
@@ -48,9 +48,9 @@
 | TDD-01 | Phase 2 | Complete |
 | TDD-02 | Phase 2 | Complete |
 | TDD-03 | Phase 2 | Complete |
-| BLOG-01 | Phase 3 | Pending |
-| BLOG-02 | Phase 3 | Pending |
-| BLOG-03 | Phase 3 | Pending |
+| BLOG-01 | Phase 3 | Complete |
+| BLOG-02 | Phase 3 | Complete |
+| BLOG-03 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 11 total

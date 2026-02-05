@@ -8,7 +8,7 @@ Integrate worktree-based execution (repo root read-only, subagents in wt/) and a
 
 - [x] **Phase 1: Worktree Integration** — Executor spawns subagents in worktrees; orchestrator merges with test verification
 - [ ] **Phase 2: TDD Workflow** — Plan→Spec→Red→Green→Refactor as primary execution path
-- [ ] **Phase 3: Milestone Blog Posts** — Auto-generate 2 technical blog posts per completed milestone
+- [x] **Phase 3: Milestone Blog Posts** — Auto-generate 2 technical blog posts per completed milestone
 
 ## Phase Details
 
@@ -55,9 +55,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: Blog generation infrastructure — Templates, script, retry logic, directory setup
-- [ ] 03-02: Artifact collection & content synthesis — Collect artifacts, synthesize architecture and agentic posts
-- [ ] 03-03: Workflow integration — Integrate into complete-milestone workflow with config flag
+- [x] 03-01: Blog generation infrastructure — Templates, script, retry logic, directory setup
+- [x] 03-02: Artifact collection & content synthesis — Collect artifacts, synthesize architecture and agentic posts
+- [x] 03-03: Workflow integration — Integrate into complete-milestone workflow with config flag
 
 ## Progress
 
@@ -65,7 +65,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Worktree Integration | 2/2 | Complete | 2025-02-03 |
 | 2. TDD Workflow | 2/3 | In progress | — |
-| 3. Milestone Blog Posts | 0/3 | Planned | - |
+| 3. Milestone Blog Posts | 3/3 | Complete | 2026-02-05 |
 
 ---
 *Roadmap created: 2025-02-03*
