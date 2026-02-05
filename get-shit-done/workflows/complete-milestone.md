@@ -766,25 +766,42 @@ BLOG_GENERATION=$(cat .planning/config.json 2>/dev/null | grep -o '"blog_generat
 **If disabled:** Skip silently (log: "Blog generation disabled, skipping")
 
 **If enabled:**
-1. Extract milestone version and name (from user input or git tag)
-2. Call blog generation script: `node scripts/generate-blog-posts.js ${MILESTONE_VERSION} "${MILESTONE_NAME}"`
-3. Handle errors gracefully:
-   - Script has built-in retry logic (3 attempts with exponential backoff)
-   - If script returns error after retries, log warning but continue
-   - Use `set +e` before script call, check exit code after
-   - Log: "⚠ Blog generation failed after retries. Milestone completion continues."
-4. If successful, log: "✓ Blog posts generated: docs/blog/v${MILESTONE_VERSION}-*.md"
+
+1. Extract milestone version and name:
+```bash
+# MILESTONE_VERSION comes from git_tag step (strip "v" prefix)
+# Use the tag created in the previous step, e.g., v1.0 → 1.0
+MILESTONE_VERSION="${GIT_TAG#v}"
+
+# MILESTONE_NAME comes from user input in verify_readiness step
+# Already captured as variable, e.g., "MVP" or "Worktree Integration"
+```
+
+2. Call blog generation script with non-blocking error handling:
+```bash
+set +e
+node scripts/generate-blog-posts.js "${MILESTONE_VERSION}" "${MILESTONE_NAME}"
+EXIT_CODE=$?
+set -e
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "⚠ Blog generation failed after retries. Milestone completion continues."
+else
+  echo "✓ Blog posts generated: docs/blog/v${MILESTONE_VERSION}-*.md"
+fi
+```
 
 **Non-blocking behavior:**
 - Always continue to next step (git_commit_milestone) regardless of blog generation success/failure
 - Errors are warnings, not failures
 - Milestone completion proceeds normally even if blog generation fails
+- Script has built-in retry logic (3 attempts with exponential backoff)
 
 **Integration notes:**
-- Milestone version comes from git_tag step (v[X.Y] format)
+- Milestone version comes from git_tag step (v[X.Y] format, strip "v" prefix)
 - Milestone name comes from user input in verify_readiness step
 - Script path: `scripts/generate-blog-posts.js` (relative to repo root)
-- Output location: `docs/blog/` (already gitignored from Plan 03-01)
+- Output location: `docs/blog/` (already gitignored)
 
 </step>
 
