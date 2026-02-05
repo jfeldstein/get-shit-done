@@ -19,6 +19,12 @@
 - [x] **TDD-02**: Planner produces TDD plans when heuristic applies (or by config preference)
 - [x] **TDD-03**: Executor runs Red-Green-Refactor cycle for TDD plans (failing test → implement → refactor)
 
+### Milestone Blog Posts
+
+- [ ] **BLOG-01**: /gsd:complete-milestone triggers automatic blog post generation
+- [ ] **BLOG-02**: Posts draw from all milestone artifacts (SUMMARY, CONTEXT, VERIFICATION, UAT, diffs, session logs)
+- [ ] **BLOG-03**: Posts land in docs/blog/ (gitignored) for human retrieval and external publishing
+
 ## v2 Requirements
 
 (None — deferred items would go here)
@@ -42,12 +48,15 @@
 | TDD-01 | Phase 2 | Complete |
 | TDD-02 | Phase 2 | Complete |
 | TDD-03 | Phase 2 | Complete |
+| BLOG-01 | Phase 3 | Pending |
+| BLOG-02 | Phase 3 | Pending |
+| BLOG-03 | Phase 3 | Pending |
 
 **Coverage:**
-- v1 requirements: 8 total
-- Mapped to phases: 8
+- v1 requirements: 11 total
+- Mapped to phases: 11
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2025-02-03*
-*Last updated: 2025-02-03 after roadmap creation*
+*Last updated: 2026-02-05 after Phase 3 context*

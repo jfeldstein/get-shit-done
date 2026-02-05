@@ -8,6 +8,7 @@ Integrate worktree-based execution (repo root read-only, subagents in wt/) and a
 
 - [x] **Phase 1: Worktree Integration** — Executor spawns subagents in worktrees; orchestrator merges with test verification
 - [ ] **Phase 2: TDD Workflow** — Plan→Spec→Red→Green→Refactor as primary execution path
+- [ ] **Phase 3: Milestone Blog Posts** — Auto-generate 2 technical blog posts per completed milestone
 
 ## Phase Details
 
@@ -42,12 +43,29 @@ Plans:
 - [x] 02-02: Executor TDD cycle verification and hardening
 - [ ] 02-03: Test infrastructure checkpoint (gap closure)
 
+### Phase 3: Milestone Blog Posts
+**Goal**: Automatically generate 2 technical blog posts per completed milestone: (1) architecture/project learnings, (2) agentic coding practices learnings.
+**Depends on**: Phase 2
+**Requirements**: BLOG-01, BLOG-02, BLOG-03
+**Success Criteria** (what must be TRUE):
+  1. /gsd:complete-milestone triggers blog post generation
+  2. Posts draw from all milestone artifacts (summaries, context, verification, UAT, diffs, session logs)
+  3. Posts land in docs/blog/ (gitignored) for human retrieval
+  4. Generation failures retry, then warn without blocking
+**Plans**: TBD
+
+Plans:
+- [ ] 03-01: TBD during plan-phase
+- [ ] 03-02: TBD
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Worktree Integration | 2/2 | Complete | 2025-02-03 |
 | 2. TDD Workflow | 2/3 | In progress | — |
+| 3. Milestone Blog Posts | 0/3 | Planned | - |
 
 ---
 *Roadmap created: 2025-02-03*
+*Phase 3 added: 2026-02-05*
