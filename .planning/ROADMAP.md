@@ -7,7 +7,7 @@ Integrate worktree-based execution (repo root read-only, subagents in wt/) and a
 ## Phases
 
 - [x] **Phase 1: Worktree Integration** — Executor spawns subagents in worktrees; orchestrator merges with test verification
-- [ ] **Phase 2: TDD Workflow** — Plan→Spec→Red→Green→Refactor as primary execution path
+- [x] **Phase 2: TDD Workflow** — Plan→Spec→Red→Green→Refactor as primary execution path
 
 ## Phase Details
 
@@ -35,18 +35,18 @@ Plans:
   1. Planner defaults to or prefers TDD plans when heuristic applies
   2. Executor runs Red-Green-Refactor cycle for TDD plans
   3. TDD plans produce 2-3 commits (test, feat, refactor)
-**Plans**: TBD (2-3 plans expected)
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD during plan-phase
-- [ ] 02-02: TBD
+- [x] 02-01: Planner TDD preference and config
+- [x] 02-02: Executor TDD cycle verification and hardening
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Worktree Integration | 2/2 | Complete | 2025-02-03 |
-| 2. TDD Workflow | 0/2 | Not started | - |
+| 2. TDD Workflow | 2/2 | Complete | 2025-02-03 |
 
 ---
 *Roadmap created: 2025-02-03*

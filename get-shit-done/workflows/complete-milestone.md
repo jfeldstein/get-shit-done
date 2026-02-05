@@ -644,7 +644,7 @@ Options (build from config):
 
 **If "Create PR":**
 
-Report: "Branch(es) ready for PR. Open PR from {branch(es)} to {base_branch}. Run CI, review, then merge. Branches preserved."
+Report: "Branch(es) ready for PR. Use gh cli: `gh pr create --base {base_branch} --head {branch}` (run once per branch if multiple). Run CI, review, then merge. Branches preserved."
 
 **If "Squash merge":**
 

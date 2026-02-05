@@ -15,9 +15,9 @@
 
 ### TDD Workflow
 
-- [ ] **TDD-01**: Plan → Spec → Red → Green → Refactor is the primary execution path
-- [ ] **TDD-02**: Planner produces TDD plans when heuristic applies (or by config preference)
-- [ ] **TDD-03**: Executor runs Red-Green-Refactor cycle for TDD plans (failing test → implement → refactor)
+- [x] **TDD-01**: Plan → Spec → Red → Green → Refactor is the primary execution path
+- [x] **TDD-02**: Planner produces TDD plans when heuristic applies (or by config preference)
+- [x] **TDD-03**: Executor runs Red-Green-Refactor cycle for TDD plans (failing test → implement → refactor)
 
 ## v2 Requirements
 
@@ -39,9 +39,9 @@
 | WT-03 | Phase 1 | Complete |
 | WT-04 | Phase 1 | Complete |
 | WT-05 | Phase 1 | Complete |
-| TDD-01 | Phase 2 | Pending |
-| TDD-02 | Phase 2 | Pending |
-| TDD-03 | Phase 2 | Pending |
+| TDD-01 | Phase 2 | Complete |
+| TDD-02 | Phase 2 | Complete |
+| TDD-03 | Phase 2 | Complete |
 
 **Coverage:**
 - v1 requirements: 8 total

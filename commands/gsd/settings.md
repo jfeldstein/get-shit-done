@@ -106,7 +106,7 @@ AskUserQuestion([
     multiSelect: false,
     options: [
       { label: "Merge directly (Solo)", description: "Squash/merge to base_branch — no PR" },
-      { label: "Create PR (Team)", description: "Leave branch for PR, CI, review" }
+      { label: "Create PR (Team)", description: "Leave branch; use gh pr create for PR, CI, review" }
     ]
   }
 ])

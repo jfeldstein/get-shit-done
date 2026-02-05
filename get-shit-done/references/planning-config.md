@@ -180,7 +180,7 @@ fi
 
 | Option | When shown | Result |
 |--------|------------|--------|
-| Create PR | `create_pr_on_complete: true` | Leave branch for user to open PR to `base_branch` |
+| Create PR | `create_pr_on_complete: true` | Leave branch for user to create PR via `gh pr create --base {base_branch} --head {branch}` |
 | Squash merge | always | Single clean commit on `base_branch` |
 | Merge with history | always | Preserves all individual commits on `base_branch` |
 | Delete without merging | always | Discard branch work |

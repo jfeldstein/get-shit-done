@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2025-02-03)
 
 **Core value:** GSD honors the "NEVER MODIFY REPO ROOT" contract when spawning subagents.
-**Current focus:** Phase 1 — Worktree Integration
+**Current focus:** Milestone complete — Worktree Integration + TDD Workflow
 
 ## Current Position
 
-Phase: 1 of 2 (Worktree Integration)
+Phase: 2 of 2 (TDD Workflow)
 Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2025-02-03 — Completed 01-02-PLAN.md
+Status: Milestone complete
+Last activity: 2025-02-03 — Completed 02-02-PLAN.md
 
 Progress: [██████████] 100%
 

@@ -749,6 +749,15 @@ Why bad: Verification fatigue. Combine into one checkpoint at end.
 
 <tdd_integration>
 
+## TDD Preference (from config)
+
+The orchestrator (plan-phase) provides `tdd_preference` in planning context. Parse it at start of planning. If not provided, treat as "default".
+
+**Decision logic before task breakdown:**
+- **never**: Skip TDD heuristic entirely; all plans get `type: execute`.
+- **default**: Apply TDD heuristic (expect(fn(in)).toBe(out)? → TDD plan). Create type:tdd when heuristic applies.
+- **always**: Apply heuristic strictly; for any task where behavior is testable, MUST create type:tdd plan.
+
 ## When TDD Improves Quality
 
 TDD is about design quality, not coverage metrics. The red-green-refactor cycle forces thinking about behavior before implementation.
