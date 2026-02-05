@@ -17,3 +17,6 @@ hooks/dist/
 # Animation assets
 animation/
 *.gif
+
+# Blog posts (generated)
+docs/blog/
