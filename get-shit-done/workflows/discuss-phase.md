@@ -331,10 +331,20 @@ Create CONTEXT.md capturing decisions made.
 
 ```bash
 # Match existing directory (padded or unpadded)
+# Search repo root first, then worktrees
 PADDED_PHASE=$(printf "%02d" ${PHASE})
 PHASE_DIR=$(ls -d .planning/phases/${PADDED_PHASE}-* .planning/phases/${PHASE}-* 2>/dev/null | head -1)
+
+# If not found at repo root, check worktrees
 if [ -z "$PHASE_DIR" ]; then
-  # Create from roadmap name (lowercase, hyphens)
+  for wt in wt/*/; do
+    PHASE_DIR=$(ls -d "${wt}.planning/phases/${PADDED_PHASE}-"* "${wt}.planning/phases/${PHASE}-"* 2>/dev/null | head -1)
+    [ -n "$PHASE_DIR" ] && break
+  done
+fi
+
+# If still not found, create at repo root
+if [ -z "$PHASE_DIR" ]; then
   PHASE_NAME=$(grep "Phase ${PHASE}:" .planning/ROADMAP.md | sed 's/.*Phase [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
   mkdir -p ".planning/phases/${PADDED_PHASE}-${PHASE_NAME}"
   PHASE_DIR=".planning/phases/${PADDED_PHASE}-${PHASE_NAME}"

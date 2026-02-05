@@ -29,8 +29,17 @@ Then verify each level against the actual codebase.
 
 ```bash
 # Phase directory (match both zero-padded and unpadded)
+# Search repo root first, then worktrees
 PADDED_PHASE=$(printf "%02d" ${PHASE_ARG} 2>/dev/null || echo "${PHASE_ARG}")
 PHASE_DIR=$(ls -d .planning/phases/${PADDED_PHASE}-* .planning/phases/${PHASE_ARG}-* 2>/dev/null | head -1)
+
+# If not found at repo root, check worktrees
+if [ -z "$PHASE_DIR" ]; then
+  for wt in wt/*/; do
+    PHASE_DIR=$(ls -d "${wt}.planning/phases/${PADDED_PHASE}-"* "${wt}.planning/phases/${PHASE_ARG}-"* 2>/dev/null | head -1)
+    [ -n "$PHASE_DIR" ] && break
+  done
+fi
 
 # Phase goal from ROADMAP
 grep -A 5 "Phase ${PHASE_NUM}" .planning/ROADMAP.md
@@ -39,10 +48,10 @@ grep -A 5 "Phase ${PHASE_NUM}" .planning/ROADMAP.md
 grep -E "^| ${PHASE_NUM}" .planning/REQUIREMENTS.md 2>/dev/null
 
 # All SUMMARY files (claims to verify)
-ls "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null
+find "$PHASE_DIR" -maxdepth 1 -name "*-SUMMARY.md" 2>/dev/null | sort
 
 # All PLAN files (for must_haves in frontmatter)
-ls "$PHASE_DIR"/*-PLAN.md 2>/dev/null
+find "$PHASE_DIR" -maxdepth 1 -name "*-PLAN.md" 2>/dev/null | sort
 ```
 
 **Extract phase goal:** Parse ROADMAP.md for this phase's goal/description. This is the outcome to verify, not the tasks.

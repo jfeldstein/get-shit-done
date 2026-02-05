@@ -93,11 +93,20 @@ Parse $ARGUMENTS as phase number (e.g., "4") or plan number (e.g., "04-02").
 
 ```bash
 # Find phase directory (match both zero-padded and unpadded)
+# Search repo root first, then worktrees
 PADDED_PHASE=$(printf "%02d" ${PHASE_ARG} 2>/dev/null || echo "${PHASE_ARG}")
 PHASE_DIR=$(ls -d .planning/phases/${PADDED_PHASE}-* .planning/phases/${PHASE_ARG}-* 2>/dev/null | head -1)
 
+# If not found at repo root, check worktrees
+if [ -z "$PHASE_DIR" ]; then
+  for wt in wt/*/; do
+    PHASE_DIR=$(ls -d "${wt}.planning/phases/${PADDED_PHASE}-"* "${wt}.planning/phases/${PHASE_ARG}-"* 2>/dev/null | head -1)
+    [ -n "$PHASE_DIR" ] && break
+  done
+fi
+
 # Find SUMMARY files
-ls "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null
+find "$PHASE_DIR" -maxdepth 1 -name "*-SUMMARY.md" 2>/dev/null | sort
 ```
 
 Read each SUMMARY.md to extract testable deliverables.

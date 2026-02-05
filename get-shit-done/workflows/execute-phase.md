@@ -165,36 +165,55 @@ Branching: {strategy} → {branch_name}
 </step>
 
 <step name="validate_phase">
-Confirm phase exists and has plans:
+Confirm phase exists and has plans. Search recursively to find plans in repo root OR worktrees.
 
 ```bash
 # Match both zero-padded (05-*) and unpadded (5-*) folders
 PADDED_PHASE=$(printf "%02d" ${PHASE_ARG} 2>/dev/null || echo "${PHASE_ARG}")
-PHASE_DIR=$(ls -d .planning/phases/${PADDED_PHASE}-* .planning/phases/${PHASE_ARG}-* 2>/dev/null | head -1)
+
+# Search for phase directory in repo root first, then worktrees
+PHASE_DIR=$(find . -path "./wt/*/.*" -prune -o -type d -name "${PADDED_PHASE}-*" -path "*/.planning/phases/*" -print 2>/dev/null | head -1)
 if [ -z "$PHASE_DIR" ]; then
-  echo "ERROR: No phase directory matching '${PHASE_ARG}'"
+  PHASE_DIR=$(find . -path "./wt/*/.*" -prune -o -type d -name "${PHASE_ARG}-*" -path "*/.planning/phases/*" -print 2>/dev/null | head -1)
+fi
+
+# Also check worktrees explicitly (find may not traverse them)
+if [ -z "$PHASE_DIR" ]; then
+  for wt in wt/*/; do
+    PHASE_DIR=$(ls -d "${wt}.planning/phases/${PADDED_PHASE}-"* "${wt}.planning/phases/${PHASE_ARG}-"* 2>/dev/null | head -1)
+    [ -n "$PHASE_DIR" ] && break
+  done
+fi
+
+if [ -z "$PHASE_DIR" ]; then
+  echo "ERROR: No phase directory matching '${PHASE_ARG}' in repo root or worktrees"
   exit 1
 fi
 
-PLAN_COUNT=$(ls -1 "$PHASE_DIR"/*-PLAN.md 2>/dev/null | wc -l | tr -d ' ')
+# Count plans (search recursively in case of nested structure)
+PLAN_COUNT=$(find "$PHASE_DIR" -maxdepth 1 -name "*-PLAN.md" 2>/dev/null | wc -l | tr -d ' ')
 if [ "$PLAN_COUNT" -eq 0 ]; then
   echo "ERROR: No plans found in $PHASE_DIR"
   exit 1
 fi
+
+echo "Found $PLAN_COUNT plans in $PHASE_DIR"
 ```
 
 Report: "Found {N} plans in {phase_dir}"
+
+**Note:** PHASE_DIR may be in repo root (`.planning/phases/XX-name/`) or in a worktree (`wt/phase-XX/.planning/phases/XX-name/`). Subsequent steps use PHASE_DIR as the canonical location.
 </step>
 
 <step name="discover_plans">
 List all plans and extract metadata:
 
 ```bash
-# Get all plans
-ls -1 "$PHASE_DIR"/*-PLAN.md 2>/dev/null | sort
+# Get all plans (PHASE_DIR already resolved to correct location)
+find "$PHASE_DIR" -maxdepth 1 -name "*-PLAN.md" 2>/dev/null | sort
 
 # Get completed plans (have SUMMARY.md)
-ls -1 "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null | sort
+find "$PHASE_DIR" -maxdepth 1 -name "*-SUMMARY.md" 2>/dev/null | sort
 ```
 
 For each plan, read frontmatter to extract:
