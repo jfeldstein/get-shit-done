@@ -52,11 +52,12 @@ Plans:
   2. Posts draw from all milestone artifacts (summaries, context, verification, UAT, diffs, session logs)
   3. Posts land in docs/blog/ (gitignored) for human retrieval
   4. Generation failures retry, then warn without blocking
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD during plan-phase
-- [ ] 03-02: TBD
+- [ ] 03-01: Blog generation infrastructure — Templates, script, retry logic, directory setup
+- [ ] 03-02: Artifact collection & content synthesis — Collect artifacts, synthesize architecture and agentic posts
+- [ ] 03-03: Workflow integration — Integrate into complete-milestone workflow with config flag
 
 ## Progress
 
