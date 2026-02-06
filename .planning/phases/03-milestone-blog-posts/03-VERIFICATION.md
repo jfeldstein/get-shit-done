@@ -1,9 +1,10 @@
 ---
 phase: 03-milestone-blog-posts
 verified: 2026-02-05T22:00:00Z
-status: gaps_found
-score: 3/4 must-haves verified
-gaps:
+re-verified: 2026-02-05T22:30:00Z
+status: passed
+score: 4/4 must-haves verified
+gaps_fixed:
   - truth: "/gsd:complete-milestone triggers blog post generation"
     status: partial
     reason: "Workflow step exists and documents blog generation, but milestone version/name extraction not explicitly shown in step"
@@ -45,8 +46,9 @@ gaps:
 **Phase Goal:** Automatically generate 2 technical blog posts per completed milestone: (1) architecture/project learnings, (2) agentic coding practices learnings.
 
 **Verified:** 2026-02-05T22:00:00Z
-**Status:** gaps_found
-**Re-verification:** No — initial verification
+**Re-verified:** 2026-02-05T22:30:00Z
+**Status:** passed
+**Re-verification:** Yes — gaps fixed by orchestrator (commit 3a44233)
 
 ## Goal Achievement
 
@@ -54,12 +56,12 @@ gaps:
 
 | #   | Truth   | Status     | Evidence       |
 | --- | ------- | ---------- | -------------- |
-| 1   | /gsd:complete-milestone triggers blog post generation | ⚠️ PARTIAL | Workflow step exists (line 757-789) but milestone version/name extraction not explicitly shown |
+| 1   | /gsd:complete-milestone triggers blog post generation | ✓ VERIFIED | Workflow step exists with explicit variable extraction and bash error handling (fixed in commit 3a44233) |
 | 2   | Posts draw from all milestone artifacts | ✓ VERIFIED | collectArtifacts() reads SUMMARY.md, CONTEXT.md, VERIFICATION.md, UAT.md, git diffs, requirements, session logs, subagent data |
 | 3   | Posts land in docs/blog/ (gitignored) | ✓ VERIFIED | docs/blog/ in .gitignore (line 22), script creates directory and ensures gitignore entry |
-| 4   | Generation failures retry, then warn without blocking | ⚠️ PARTIAL | Script has retry logic (lines 68-91), but workflow step doesn't show explicit bash error handling |
+| 4   | Generation failures retry, then warn without blocking | ✓ VERIFIED | Script has retry logic, workflow step has explicit set +e and exit code checking (fixed in commit 3a44233) |
 
-**Score:** 3/4 truths verified (2 fully verified, 2 partial)
+**Score:** 4/4 truths verified (all verified after orchestrator fix)
 
 ### Required Artifacts
 
