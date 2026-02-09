@@ -1,13 +1,17 @@
-# Requirements: GSD Workflow Improvements
+# Requirements Archive: v1 GSD Workflow Improvements
 
-**Defined:** 2025-02-03
-**Core Value:** GSD honors the "NEVER MODIFY REPO ROOT" contract when spawning subagents.
+**Archived:** 2026-02-09
+**Status:** ✅ SHIPPED
+
+This is the archived requirements specification for v1. For current requirements, see `.planning/REQUIREMENTS.md` (created for next milestone).
+
+---
 
 ## v1 Requirements
 
 ### Worktree Integration
 
-- [ ] **WT-01**: wt/ is in .gitignore (done)
+- [x] **WT-01**: wt/ is in .gitignore (done)
 - [x] **WT-02**: Executor spawns subagents in worktrees (wt/agent-xxx), never in repo root
 - [x] **WT-03**: Repo root is read-only for all subagent work
 - [x] **WT-04**: Branch names follow feature--<name>--agents--agent-<id>--<task> pattern (double-dash segments)
@@ -25,17 +29,6 @@
 - [x] **BLOG-02**: Posts draw from all milestone artifacts (SUMMARY, CONTEXT, VERIFICATION, UAT, diffs, session logs)
 - [x] **BLOG-03**: Posts land in docs/blog/ (gitignored) for human retrieval and external publishing
 
-## v2 Requirements
-
-(None — deferred items would go here)
-
-## Out of Scope
-
-| Feature | Reason |
-|---------|--------|
-| Worktrees outside repo (e.g. ~/Repositories/) | Per skill, worktrees live in wt/ under repo root |
-| Replacing GSD planning model | Integrate worktrees into existing orchestration |
-
 ## Traceability
 
 | Requirement | Phase | Status |
@@ -52,11 +45,13 @@
 | BLOG-02 | Phase 3 | Complete |
 | BLOG-03 | Phase 3 | Complete |
 
-**Coverage:**
-- v1 requirements: 11 total
-- Mapped to phases: 11
-- Unmapped: 0 ✓
+---
+
+## Milestone Summary
+
+**Shipped:** 11 of 11 v1 requirements
+**Adjusted:** WT-05 — Test suite execution before merge explicitly skipped per user decision
+**Dropped:** None
 
 ---
-*Requirements defined: 2025-02-03*
-*Last updated: 2026-02-05 after Phase 3 context*
+*Archived: 2026-02-09 as part of v1 milestone completion*

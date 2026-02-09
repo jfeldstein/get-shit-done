@@ -18,13 +18,15 @@ GSD must honor the "NEVER MODIFY REPO ROOT" contract when spawning subagents. Ex
 - ✓ Subagent orchestration (planner, executor, researcher, verifier) — existing
 - ✓ TDD plan structure and references (`tdd.md`, plan type) — existing
 - ✓ Atomic commits per task — existing
+- ✓ **TDD workflow** — v1.0 (Plan → Spec → Red → Green → Refactor)
+- ✓ **Worktree contract** — v1.0 (wt/ in gitignore, subagents in worktrees, repo root read-only)
+- ✓ **Branch naming** — v1.0 (feature--{name}--agents--agent-{id}--{task})
+- ✓ **Orchestrator merge flow** — v1.0 (merge, cleanup worktrees; test suite skipped per user decision)
+- ✓ **Milestone blog posts** — v1.0 (auto-generate 2 posts per milestone)
 
 ### Active
 
-- [ ] **TDD workflow**: Plan → Spec → Red → Green → Refactor as primary execution path
-- [ ] **Worktree contract**: Add `wt/` to gitignore; subagents work only in worktrees; repo root read-only
-- [ ] **Branch naming**: Follow `feature--<name>--agents--agent-<id>--<task>` pattern (double-dash segments)
-- [ ] **Merge verification**: Orchestrator merges agent branches, runs test suite (exit 0), then cleanup
+(None — start next milestone with `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -33,23 +35,20 @@ GSD must honor the "NEVER MODIFY REPO ROOT" contract when spawning subagents. Ex
 
 ## Context
 
-- **Existing codebase**: `bin/install.js` (~1150 lines), hooks, commands, agents, templates. No test framework.
-- **Worktree skill**: [parallel-agents-in-local-worktrees](file:///Users/jordan/.claude/skills/parallel-agents-in-local-worktrees/SKILL.md) defines the contract: `wt/` for worktrees, repo root read-only, sanitized branch names, mandatory test execution before merge.
-- **TDD reference**: `get-shit-done/references/tdd.md` defines TDD plan structure and Red-Green-Refactor cycle. User wants this as the default/preferred workflow.
-
-## Constraints
-
-- **Compatibility**: Must not break existing GSD installs or workflows
-- **Stack**: Node.js, no new runtime dependencies unless justified
-- **Worktree location**: `wt/` inside repo root (per skill)
+- **Shipped v1.0:** 2026-02-09
+- **Codebase:** bin/install.js, hooks, commands, agents, templates, scripts/generate-blog-posts.js
+- **Worktree skill:** [parallel-agents-in-local-worktrees](file:///Users/jordan/.claude/skills/parallel-agents-in-local-worktrees/SKILL.md)
+- **TDD reference:** get-shit-done/references/tdd.md
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| TDD as primary workflow | User wants Plan→Spec→Red→Green→Refactor | — Pending |
-| Worktree in `wt/` | Align with parallel-agents skill | — Pending |
-| Repo root read-only | Subagents never touch main working tree | — Pending |
+| TDD as primary workflow | User wants Plan→Spec→Red→Green→Refactor | ✓ Shipped |
+| Worktree in `wt/` | Align with parallel-agents skill | ✓ Shipped |
+| Repo root read-only | Subagents never touch main working tree | ✓ Shipped |
+| Test suite skipped before merge | User decision in 01-CONTEXT.md | ✓ Applied |
+| Blog generation non-blocking | Milestone completion continues on failure | ✓ Shipped |
 
 ---
-*Last updated: 2025-02-03 after initialization*
+*Last updated: 2026-02-09 after v1.0 milestone*
