@@ -33,10 +33,9 @@ async function generateBlogPosts(milestoneVersion, milestoneName) {
     const architectureTemplate = loadTemplate('blog-post-architecture.md');
     const agenticTemplate = loadTemplate('blog-post-agentic.md');
 
-    // Collect artifacts (stub for now)
     const artifacts = collectArtifacts(milestoneVersion);
 
-    // Synthesize posts (stubs for now)
+    // Synthesize posts
     const architecturePost = synthesizeArchitecturePost(artifacts, architectureTemplate);
     const agenticPost = synthesizeAgenticPost(artifacts, agenticTemplate);
 
@@ -507,6 +506,27 @@ function synthesizeArchitecturePost(artifacts, template) {
 }
 
 /**
+ * Detect TDD commit sequences (test → feat → optional refactor)
+ * @param {string[]} commits - Array of commit messages (e.g. from git log --oneline, strip hash)
+ * @returns {{ cycles: number, sequences: Array<{test: string, feat: string}> }}
+ */
+function detectTddPatterns(commits) {
+  const tddCycles = [];
+  const messages = commits.map(c => (typeof c === 'string' ? c.replace(/^\S+\s+/, '') : c));
+  for (let i = 0; i < messages.length - 1; i++) {
+    const current = messages[i];
+    const next = messages[i + 1];
+    if (current && next && current.match(/^test\(/i) && next.match(/^feat\(/i)) {
+      tddCycles.push({ test: current, feat: next });
+    }
+  }
+  return {
+    cycles: tddCycles.length,
+    sequences: tddCycles
+  };
+}
+
+/**
  * Synthesize agentic post from artifacts and template
  * @param {Object} artifacts - Artifact data
  * @param {string} template - Template content
@@ -538,11 +558,24 @@ function synthesizeAgenticPost(artifacts, template) {
     intro += `Across ${artifacts.phases.summaries.length} phase summaries, we observed clear patterns in task execution, checkpoint usage, and deviation handling.`;
   }
 
-  // Extract iteration patterns from subagent data
+  // Extract iteration patterns from subagent data and TDD commit analysis
   let iterationPatterns = '';
+  const patterns = [];
+
+  // TDD pattern detection from commit history
+  const tddPatterns = detectTddPatterns(artifacts.git?.commits || []);
+  if (tddPatterns.cycles > 0) {
+    patterns.push(`- TDD cycles detected: ${tddPatterns.cycles} (test → feat sequences)`);
+    if (tddPatterns.sequences.length > 0 && tddPatterns.sequences.length <= 3) {
+      patterns.push(...tddPatterns.sequences.map(s => `  - Example: test → ${s.feat.substring(0, 50)}${s.feat.length > 50 ? '...' : ''}`));
+    } else if (tddPatterns.sequences.length > 3) {
+      patterns.push(`  - Example: ${tddPatterns.sequences[0].test} → ${tddPatterns.sequences[0].feat.substring(0, 40)}...`);
+    }
+  } else {
+    patterns.push('- No explicit TDD patterns detected in commit history');
+  }
+
   if (artifacts.subagentData && Object.keys(artifacts.subagentData).length > 0) {
-    const patterns = [];
-    
     // Extract iteration counts
     const iterationCounts = [];
     for (const [agentId, data] of Object.entries(artifacts.subagentData)) {
@@ -550,34 +583,25 @@ function synthesizeAgenticPost(artifacts, template) {
         iterationCounts.push(data.iterations);
       }
     }
-    
     if (iterationCounts.length > 0) {
       const avgIterations = iterationCounts.reduce((a, b) => a + b, 0) / iterationCounts.length;
       patterns.push(`- Average iterations per task: ${avgIterations.toFixed(1)}`);
     }
-
-    // Extract planner-checker patterns
     const plannerCheckerCount = Object.values(artifacts.subagentData)
       .filter(data => data.type === 'planner-checker' || data.workflow === 'planner-checker').length;
     if (plannerCheckerCount > 0) {
       patterns.push(`- Planner-checker loops: ${plannerCheckerCount}`);
     }
-
-    iterationPatterns = patterns.length > 0 
-      ? patterns.join('\n')
-      : 'Iteration patterns will be extracted from subagent execution data.';
   } else {
-    // Fallback to phase summaries
     const revisionMentions = artifacts.phases.summaries
       .map(s => (s.content.match(/revision|iteration|retry/gi) || []).length)
       .reduce((a, b) => a + b, 0);
-    
     if (revisionMentions > 0) {
-      iterationPatterns = `- Revision cycles observed: ${revisionMentions} mentions across phase summaries`;
-    } else {
-      iterationPatterns = 'Iteration patterns will be documented from milestone execution data.';
+      patterns.push(`- Revision cycles observed: ${revisionMentions} mentions across phase summaries`);
     }
   }
+
+  iterationPatterns = patterns.length > 0 ? patterns.join('\n') : 'Iteration patterns will be documented from milestone execution data.';
 
   // Extract failures and recoveries from VERIFICATION.md and summaries
   let failures = '';
