@@ -59,6 +59,18 @@ Plans:
 - [x] 03-02: Artifact collection & content synthesis — Collect artifacts, synthesize architecture and agentic posts
 - [x] 03-03: Workflow integration — Integrate into complete-milestone workflow with config flag
 
+### Phase 4: Tech Debt Cleanup
+**Goal**: Clean up minor tech debt from Phase 3 before milestone completion.
+**Depends on**: Phase 3
+**Requirements**: None (cleanup only)
+**Success Criteria** (what must be TRUE):
+  1. TDD pattern detection added to blog script (identifies test/feat/refactor sequences)
+  2. Outdated stub comments removed from generate-blog-posts.js
+**Plans**: 1 plan
+
+Plans:
+- [ ] 04-01: Tech debt cleanup — TDD pattern detection, remove stub comments
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
@@ -66,6 +78,7 @@ Plans:
 | 1. Worktree Integration | 2/2 | Complete | 2025-02-03 |
 | 2. TDD Workflow | 2/3 | In progress | — |
 | 3. Milestone Blog Posts | 3/3 | Complete | 2026-02-05 |
+| 4. Tech Debt Cleanup | 0/1 | Planned | - |
 
 ---
 *Roadmap created: 2025-02-03*
