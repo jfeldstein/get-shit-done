@@ -21,3 +21,6 @@ animation/
 # Internal planning documents
 reports/
 RAILROAD_ARCHITECTURE.md
+
+# Blog posts (generated)
+docs/blog/

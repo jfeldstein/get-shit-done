@@ -569,6 +569,57 @@ git push origin v[X.Y]
 
 </step>
 
+<step name="generate_blog_posts">
+
+Generate two blog posts for this milestone.
+
+**Check if blog generation enabled:**
+```bash
+BLOG_GENERATION=$(cat .planning/config.json 2>/dev/null | grep -o '"blog_generation"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
+```
+
+**If disabled:** Skip silently (log: "Blog generation disabled, skipping")
+
+**If enabled:**
+
+1. Extract milestone version and name:
+```bash
+# MILESTONE_VERSION comes from git_tag step (strip "v" prefix)
+# Use the tag created in the previous step, e.g., v1.0 → 1.0
+MILESTONE_VERSION="${GIT_TAG#v}"
+
+# MILESTONE_NAME comes from user input in verify_readiness step
+# Already captured as variable, e.g., "MVP" or "Worktree Integration"
+```
+
+2. Call blog generation script with non-blocking error handling:
+```bash
+set +e
+node scripts/generate-blog-posts.js "${MILESTONE_VERSION}" "${MILESTONE_NAME}"
+EXIT_CODE=$?
+set -e
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "⚠ Blog generation failed after retries. Milestone completion continues."
+else
+  echo "✓ Blog posts generated: docs/blog/v${MILESTONE_VERSION}-*.md"
+fi
+```
+
+**Non-blocking behavior:**
+- Always continue to next step (git_commit_milestone) regardless of blog generation success/failure
+- Errors are warnings, not failures
+- Milestone completion proceeds normally even if blog generation fails
+- Script has built-in retry logic (3 attempts with exponential backoff)
+
+**Integration notes:**
+- Milestone version comes from git_tag step (v[X.Y] format, strip "v" prefix)
+- Milestone name comes from user input in verify_readiness step
+- Script path: `scripts/generate-blog-posts.js` (relative to repo root)
+- Output location: `docs/blog/` (already gitignored)
+
+</step>
+
 <step name="git_commit_milestone">
 
 Commit milestone completion.

@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2025-02-03)
+See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** GSD honors the "NEVER MODIFY REPO ROOT" contract when spawning subagents.
-**Current focus:** Phase 2 — TDD Workflow (gap closure)
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 2 of 2 (TDD Workflow)
-Plan: 3 of 3 in current phase (gap closure)
-Status: Ready for execution
-Last activity: 2025-02-04 — Created 02-03-PLAN.md (test infrastructure checkpoint)
+Phase: —
+Plan: —
+Status: v1.0 shipped
+Last activity: 2026-02-09 — Milestone v1.0 complete
 
-Progress: [████████░░] 80%
+Progress: [██████████████████] 100% (v1.0)
 
 ## Accumulated Context
 
@@ -22,17 +22,18 @@ Progress: [████████░░] 80%
 
 - wt/ added to .gitignore during init
 - TDD workflow and worktree contract from user requirements
-
-### Pending Todos
-
-None yet.
+- Blog posts stored in docs/blog/ and gitignored
+- Retry logic uses exponential backoff (2s, 4s, 8s) with graceful degradation
+- Templates use {{PLACEHOLDER}} syntax for content synthesis
+- TDD pattern detection in blog script (detectTddPatterns)
+- Test suite execution before merge: skipped per user decision
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
-Last session: 2025-02-03
-Stopped at: Roadmap created, ready for /gsd-discuss-phase 1 or /gsd-plan-phase 1
+Last session: 2026-02-09
+Stopped at: v1.0 milestone complete
 Resume file: None
