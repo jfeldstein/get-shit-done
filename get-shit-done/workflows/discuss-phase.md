@@ -107,15 +107,16 @@ Phase: "API documentation"
 
 <process>
 
-<step name="validate_phase" priority="first">
+<step name="initialize" priority="first">
 Phase number from argument (required).
 
-Load and validate:
-- Read `.planning/ROADMAP.md`
-- Find phase entry
-- Extract: number, name, description, status
+```bash
+INIT=$(node ~/.claude/get-shit-done/bin/gsd-tools.js init phase-op "${PHASE}")
+```
 
-**If phase not found:**
+Parse JSON for: `commit_docs`, `phase_found`, `phase_dir`, `phase_number`, `phase_name`, `phase_slug`, `padded_phase`, `has_research`, `has_context`, `has_plans`, `has_verification`, `plan_count`, `roadmap_exists`, `planning_exists`.
+
+**If `phase_found` is false:**
 ```
 Phase [X] not found in roadmap.
 
@@ -123,64 +124,27 @@ Use /gsd:progress to see available phases.
 ```
 Exit workflow.
 
-**If phase found:** Extract PADDED_PHASE, phase name, PHASE_DIR. Continue to ensure_phase_branch.
+**If `phase_found` is true:** Continue to ensure_phase_branch.
 </step>
 
 <step name="ensure_phase_branch">
-When `branching_strategy` is "phase" or "milestone", create or switch to the feature branch so all phase work (discuss, plan, execute, validate) happens on the same branch.
+When `branching_strategy` from init is "phase" or "milestone", create or switch to the feature branch so all phase work (discuss, plan, execute, validate) happens on the same branch.
 
 **Skip if strategy is "none":** Continue to check_existing.
 
-**Load config:**
-
+**"phase" or "milestone":** Use pre-computed `branch_name` from init (or compute from templates in config):
 ```bash
-BRANCHING_STRATEGY=$(cat .planning/config.json 2>/dev/null | grep -o '"branching_strategy"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "none")
-BASE_BRANCH=$(cat .planning/config.json 2>/dev/null | grep -o '"base_branch"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "develop")
-PHASE_BRANCH_TEMPLATE=$(cat .planning/config.json 2>/dev/null | grep -o '"phase_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "gsd/phase-{phase}-{slug}")
-MILESTONE_BRANCH_TEMPLATE=$(cat .planning/config.json 2>/dev/null | grep -o '"milestone_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "gsd/{milestone}-{slug}")
+git checkout -b "$BRANCH_NAME" 2>/dev/null || git checkout "$BRANCH_NAME"
 ```
 
-**For "phase" strategy:**
-
-```bash
-# Get phase slug from roadmap (phase dir may not exist yet)
-PHASE_NAME=$(grep "Phase ${PADDED_PHASE}:" .planning/ROADMAP.md | sed 's/.*Phase [0-9]*\.*[0-9]*: //' | head -1 | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-PHASE_SLUG=$(echo "$PHASE_NAME" | tr -cd 'a-z0-9-' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
-BRANCH_NAME=$(echo "$PHASE_BRANCH_TEMPLATE" | sed "s/{phase}/$PADDED_PHASE/g" | sed "s/{slug}/$PHASE_SLUG/g")
-
-if git rev-parse --verify "$BRANCH_NAME" 2>/dev/null; then
-  git checkout "$BRANCH_NAME"
-else
-  git fetch origin "$BASE_BRANCH" 2>/dev/null
-  git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH" 2>/dev/null || git checkout -b "$BRANCH_NAME" "$BASE_BRANCH" 2>/dev/null
-fi
-```
-
-**For "milestone" strategy:**
-
-```bash
-MILESTONE_VERSION=$(grep -oE 'v[0-9]+\.[0-9]+' .planning/ROADMAP.md | head -1 || echo "v1.0")
-MILESTONE_SLUG=$(grep -A1 "## .*$MILESTONE_VERSION" .planning/ROADMAP.md | tail -1 | sed 's/.*- //' | cut -d'(' -f1 | tr -d ' ' | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
-BRANCH_NAME=$(echo "$MILESTONE_BRANCH_TEMPLATE" | sed "s/{milestone}/$MILESTONE_VERSION/g" | sed "s/{slug}/$MILESTONE_SLUG/g")
-
-if git rev-parse --verify "$BRANCH_NAME" 2>/dev/null; then
-  git checkout "$BRANCH_NAME"
-else
-  git fetch origin "$BASE_BRANCH" 2>/dev/null
-  git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH" 2>/dev/null || git checkout -b "$BRANCH_NAME" "$BASE_BRANCH" 2>/dev/null
-fi
-```
-
-**Report:** "Branch: {branch_name} (from {base_branch})"
+**Report:** "Branch: {branch_name}"
 </step>
 
 <step name="check_existing">
-Check if CONTEXT.md already exists:
+Check if CONTEXT.md already exists using `has_context` from init.
 
 ```bash
-# Match both zero-padded (05-*) and unpadded (5-*) folders
-PADDED_PHASE=$(printf "%02d" ${PHASE})
-ls .planning/phases/${PADDED_PHASE}-*/*-CONTEXT.md .planning/phases/${PHASE}-*/*-CONTEXT.md 2>/dev/null
+ls ${phase_dir}/*-CONTEXT.md 2>/dev/null
 ```
 
 **If exists:**
@@ -329,29 +293,14 @@ Create CONTEXT.md capturing decisions made.
 
 **Find or create phase directory:**
 
+Use values from init: `phase_dir`, `phase_slug`, `padded_phase`.
+
+If `phase_dir` is null (phase exists in roadmap but no directory):
 ```bash
-# Match existing directory (padded or unpadded)
-# Search repo root first, then worktrees
-PADDED_PHASE=$(printf "%02d" ${PHASE})
-PHASE_DIR=$(ls -d .planning/phases/${PADDED_PHASE}-* .planning/phases/${PHASE}-* 2>/dev/null | head -1)
-
-# If not found at repo root, check worktrees
-if [ -z "$PHASE_DIR" ]; then
-  for wt in wt/*/; do
-    PHASE_DIR=$(ls -d "${wt}.planning/phases/${PADDED_PHASE}-"* "${wt}.planning/phases/${PHASE}-"* 2>/dev/null | head -1)
-    [ -n "$PHASE_DIR" ] && break
-  done
-fi
-
-# If still not found, create at repo root
-if [ -z "$PHASE_DIR" ]; then
-  PHASE_NAME=$(grep "Phase ${PHASE}:" .planning/ROADMAP.md | sed 's/.*Phase [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-  mkdir -p ".planning/phases/${PADDED_PHASE}-${PHASE_NAME}"
-  PHASE_DIR=".planning/phases/${PADDED_PHASE}-${PHASE_NAME}"
-fi
+mkdir -p ".planning/phases/${padded_phase}-${phase_slug}"
 ```
 
-**File location:** `${PHASE_DIR}/${PADDED_PHASE}-CONTEXT.md`
+**File location:** `${phase_dir}/${padded_phase}-CONTEXT.md`
 
 **Structure the content by what was discussed:**
 
@@ -449,32 +398,13 @@ Created: .planning/phases/${PADDED_PHASE}-${SLUG}/${PADDED_PHASE}-CONTEXT.md
 </step>
 
 <step name="git_commit">
-Commit phase context:
-
-**Check planning config:**
+Commit phase context (uses `commit_docs` from init internally):
 
 ```bash
-COMMIT_PLANNING_DOCS=$(cat .planning/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
-git check-ignore -q .planning 2>/dev/null && COMMIT_PLANNING_DOCS=false
+node ~/.claude/get-shit-done/bin/gsd-tools.js commit "docs(${padded_phase}): capture phase context" --files "${phase_dir}/${padded_phase}-CONTEXT.md"
 ```
 
-**If `COMMIT_PLANNING_DOCS=false`:** Skip git operations
-
-**If `COMMIT_PLANNING_DOCS=true` (default):**
-
-```bash
-git add "${PHASE_DIR}/${PADDED_PHASE}-CONTEXT.md"
-git commit -m "$(cat <<'EOF'
-docs(${PADDED_PHASE}): capture phase context
-
-Phase ${PADDED_PHASE}: ${PHASE_NAME}
-- Implementation decisions documented
-- Phase boundary established
-EOF
-)"
-```
-
-Confirm: "Committed: docs(${PADDED_PHASE}): capture phase context"
+Confirm: "Committed: docs(${padded_phase}): capture phase context"
 </step>
 
 </process>
