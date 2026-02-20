@@ -2,6 +2,20 @@
 Git integration for GSD framework.
 </overview>
 
+<worktree_contract>
+
+**Repo root must NEVER be checked out to a feature or phase branch.** Repo root stays on the base branch (e.g. `develop`). All phase/feature work happens in worktrees only.
+
+When a GSD command uses `branching_strategy: phase` or `milestone` and needs to create or switch to a phase/milestone branch:
+
+1. **Detect location:** If current working directory is the repository root (main worktree), i.e. `$(pwd)` equals `$(git rev-parse --show-toplevel)`, you are at repo root.
+2. **At repo root:** Do NOT run `git checkout` or `git checkout -b` in the repo root. Create a worktree for the phase/milestone branch instead (e.g. `git worktree add -b <branch> wt/<branch-slug> <base_branch>`), then run all subsequent steps and any Task() spawns that write repo files with `working_directory` set to that worktree path.
+3. **Already in a worktree:** Creating or checking out the phase/milestone branch inside the current worktree is allowed (the worktree is not repo root).
+
+This matches the parallel-agents-in-local-worktrees contract: repo root is read-only for branch switching; feature/phase branches live only in worktrees.
+
+</worktree_contract>
+
 <core_principle>
 
 **Commit outcomes, not process.**

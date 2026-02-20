@@ -37,5 +37,5 @@ Phase: $ARGUMENTS (optional)
 Execute the verify-work workflow from @~/.claude/get-shit-done/workflows/verify-work.md end-to-end.
 Preserve all workflow gates (session management, test presentation, diagnosis, fix planning, routing).
 
-**Branching awareness:** When `branching_strategy` is "phase" or "milestone", ensure the feature branch is checked out so validation happens on the same branch as discuss/plan/execute.
+**Branching awareness:** When `branching_strategy` is "phase" or "milestone", ensure the feature branch is used so validation happens on the same branch as discuss/plan/execute. **Worktree contract:** Do not run `git checkout` at repo root; use a worktree for the phase branch (see get-shit-done/references/git-integration.md).
 </process>

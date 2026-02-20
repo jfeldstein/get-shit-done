@@ -13,6 +13,12 @@ allowed-tools:
   - WebFetch
   - mcp__context7__*
 ---
+
+<execution_context>
+@~/.claude/get-shit-done/references/ui-brand.md
+@~/.claude/get-shit-done/references/git-integration.md
+</execution_context>
+
 <objective>
 Create executable phase prompts (PLAN.md files) for a roadmap phase with integrated research and verification.
 
@@ -42,5 +48,4 @@ Normalize phase input in step 2 before any directory lookups.
 Execute the plan-phase workflow from @~/.claude/get-shit-done/workflows/plan-phase.md end-to-end.
 Preserve all workflow gates (validation, research, planning, verification loop, routing).
 
-**TDD Preference:** Read `tdd_preference` from `.planning/config.json` (default: `"default"`) and pass it to the planner agent in the planning context. See the workflow file for full details.
-</process>
+**TDD Preference:** Read `tdd_preference` from `.planning/config.json` (default: `"default"`) and pass it to the planner agent in the planning context. See the workflow file for full details.</process>

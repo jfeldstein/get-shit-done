@@ -56,7 +56,7 @@ PHASE_INFO=$(node ~/.claude/get-shit-done/bin/gsd-tools.js roadmap get-phase "${
 
 ## 2. Ensure Phase Branch (when branching_strategy = phase or milestone)
 
-Same logic as discuss-phase and plan-phase: create or switch to feature branch so research output lands on the same branch. Skip if strategy is "none". Use BASE_BRANCH from config (default: develop).
+Same logic as plan-phase: create or switch to feature branch so research output lands on the same branch. **Worktree contract:** Do not run `git checkout` at repo root; use a worktree for the phase branch (see get-shit-done/references/git-integration.md). Skip if strategy is "none". Use BASE_BRANCH from config (default: develop).
 
 ## 3. Check Existing Research
 
